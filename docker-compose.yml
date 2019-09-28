@@ -13,9 +13,10 @@ services:
       MYSQL_DATABASE: DB
 
   adminer:
-    image: adminer
+    # image: adminer
+    image: phpmyadmin/phpmyadmin
     ports:
-      - "8080:8080"
+      - "8080:80"
 
 volumes:
     db:
