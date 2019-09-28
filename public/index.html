@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Welcome GoLa</title>
+
+    <style>
+        * {
+            padding: 0%;
+            margin: 0%;
+        }
+
+        #app {
+            padding: 10px;
+        }
+
+        .pic {
+            width: 80%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div v-if="stores.length == 0">
+            <h1>歡迎問路 🚓</h1>
+            <button @click="search">我想問路🚖</button>                    
+        </div>
+        <p>{{ output }}</p>
+        <img class="pic" v-if="isWating" src="/img/waiting.gif" alt="等待中">
+        <img class="pic" v-if="isLoading" src="/img/speak.gif" alt="讀取中">
+        <div v-for="store in stores">
+            <p>{{ store.name }} {{ store.type }}</p>
+            <img v-if="store.src!=''" class="pic" :src="store.src" :alt="store.name">
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script>
+    <script>
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                isWating: true, //呈現走路圖
+                isLoading: false, // 呈現講話圖
+                output: '', // 呈現文字
+                stores: [], // 呈現店家資料
+                ws: null,
+            },
+            methods: {
+                search() {
+                    if (this.isLoading) {
+                        return
+                    }
+                    this.isWating = false
+                    this.isLoading = true
+                    this.ws.send('yes')
+                },
+                transform(store) {
+                    let data = {
+                        id: store.id,
+                        name: store.store_name,
+                        type: store.store_type,
+                        src: '',
+                    }
+
+                    if (store.id !== '') {
+                        // let src = '/img/' + store.id + '.gif'
+                        // 用No當檔名的話，呈顯圖片只要打上面這行，會呈現 /img/BLB010.gif
+
+                        let src = '/img/'
+
+                        if (store.id[0] === 'C') {
+                            src += 'C'
+                        } else {
+                            src += 'B' //  /img/B
+                        }
+
+                        switch (store.floor) {
+                            case 'F1':
+                                src += ' 1F'
+                                break;
+                            case 'LB':
+                                src += ' LB' // /img/B LB GIF/Aquascutum.gif
+                                break;
+                        }
+
+                        src += ' GIF/' + store.store_name + '.gif'
+                        data.src = src
+                    }
+
+                    return data
+                },
+                finish(data) {
+                    this.isLoading = false
+                    this.stores = []
+                    for (const key in data.main) {
+                        let store = data.main[key]
+                        this.stores.push(this.transform(store))
+                    }
+
+                    if (this.stores.length === 0) {
+                        for (const key in data.about) {
+                            let store = data.about[key]
+                            this.stores.push(this.transform(store))
+                        }
+                    }
+
+                    setTimeout(() => {
+                        console.log('初始化', this.stores )
+                        this.stores = [];
+                        this.isWating = true
+                        this.output = ''
+                    }, 3000)
+                },
+                display(text) {
+                    this.output = text
+                }
+            },
+            mounted() {
+                let url = window.location.host + '/stu'
+                if (window.location.protocol === 'http:') {
+                    url = 'ws://' + url
+                } else {
+                    url = 'wss://' + url
+                }
+
+                this.ws = new WebSocket(url)
+                this.ws.onmessage = (e) => {
+                    try {
+                        const data = JSON.parse(e.data)
+                        this.display('🎧 ' + data.text)
+                        this.finish(data)
+                    } catch (error) {
+                        this.display('🎤 ' + e.data)
+                    }
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
