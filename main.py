@@ -83,8 +83,8 @@ def 輸出(res):
 if __name__ == "__main__":
     # print("你要搜尋什麼呢~ ")
     try:
-        result = 聽使用者說話()
-        # result = "Fila運動鞋在哪裡"
+        #result = 聽使用者說話()
+        result = "Fila運動鞋在哪裡"
         result = result.upper()  # 全部英文變大寫
         # print("你說了: ", result)
     except speech_recognition.UnknownValueError:
