@@ -56,7 +56,7 @@ func 問路連線(c *gin.Context) {
 			return
 		}
 
-		cmd := exec.Command("python", "./main.py")
+		cmd := exec.Command("python3", "./main.py")
 		stdout := bytes.NewBuffer([]byte{})
 		stderr := bytes.NewBuffer([]byte{})
 		cmd.Stdout = stdout

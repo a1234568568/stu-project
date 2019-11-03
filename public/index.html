@@ -11,35 +11,34 @@
         * {
             padding: 10px;
             margin: 0%;
-            font-family:Microsoft JhengHei,SimHei;
-            
-            
+            font-family: Microsoft JhengHei, SimHei;
+
+
         }
 
         #app {
-            
+
             padding: 0px 10px 15px 10px;
             width: 90%;
-            height: 80%;                      
-            border-style:double;
-            border-color:brown;
-            border-width: 10px 0px 10px 0px;
-           
+            height: 80%;
+
+
             margin: auto;
-            
-            text-align:center;            
+            position: relative;
+            text-align: center;
         }
 
-        
 
-        #imgdiv{
+
+        .imgdiv {
             width: 70%;
             height: 60%;
             margin: 0px auto;
-                        
+
+
         }
 
-        #button{
+        #button {
             display: block;
             border: none;
             background-color: brown;
@@ -47,35 +46,41 @@
             margin: auto;
             font-weight: bold;
             padding: 10px;
-            color: white;
+            color: wheat;
             font-size: 20px;
         }
 
-        p{
-            background-color: white;
+        p {
+            background-color: none;
         }
 
         .pic {
             width: 80%;
+
         }
     </style>
 </head>
 
 <body>
+    <img src="/img/16pic_8921951_b.jpg" alt="background"
+        style="position:absolute; z-index:-1;width: 87%;height: 99%;left: 5.5%;top:-2%;">
     <div id="app">
-        <!--<h1>歡迎問路 🚓</h1>-->       
-        <div id='imgdiv'>
-            <img class="pic" v-if="isWating" src="/img/waiting2.gif" alt="等待中" >
+        <!--<h1>歡迎問路 🚓</h1>-->
+
+        <div class='imgdiv'>
+
+            <img class="pic" v-if="isWating" src="/img/waiting2.gif" alt="等待中">
             <img class="pic" v-if="isLoading" src="/img/speak.gif" alt="讀取中">
         </div>
         <p>{{ output }}</p>
         <button @click="search" id="button">我 想 問 路 🚖</button>
-        <div v-for="store in stores">
+        <div v-for="store in stores" class="imgdiv">
             <p>{{ store.name }} {{ store.type }}</p>
-            <img v-if="store.src!=''" class="pic" :src="store.src" :alt="store.name">
-        </div>        
+            <img v-if="store.src!=''" class="pic" :src="store.src" :alt="store.name"
+                style="margin: 0; border-style: solid;border-width: 15px;border-color:white; box-shadow:9px 9px 20px dimgray;">
+        </div>
     </div>
-    
+
 
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script>
     <script>
@@ -106,7 +111,7 @@
                     }
 
                     if (store.id !== '') {
-                         // let src = '/img/store/' + store.id + '.gif'
+                        // let src = '/img/store/' + store.id + '.gif'
                         // 用No當檔名的話，呈顯圖片只要打上面這行，會呈現 /img/BLB010.gif
                         let src = '/img/'
 
@@ -146,9 +151,9 @@
                             this.stores.push(this.transform(store))
                         }
                     }
-                    
+
                     setTimeout(() => {
-                        console.log('初始化', this.stores )
+                        console.log('初始化', this.stores)
                         this.stores = [];
                         this.isWating = true
                         this.output = ''

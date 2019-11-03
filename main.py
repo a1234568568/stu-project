@@ -8,7 +8,7 @@ import json
 import base64
 
 # 資料庫資訊
-DB_IP = "192.168.99.100"
+DB_IP = "0.0.0.0"
 DB_Username = "root"
 DB_Password = "qwe123"
 DB_DB = "DB"
@@ -75,6 +75,20 @@ def 用店家類型搜尋店家資料(words):
 
     return rows
 
+def 增加搜尋次數(stores):
+    # 打开数据库连接
+    db = pymysql.connect(DB_IP, DB_Username, DB_Password, DB_DB)
+
+    for no in stores:
+        # 使用 cursor() 方法创建一个游标对象 cursor
+        cursor = db.cursor()
+        sql = "UPDATE `StoreDetails` SET `search` = `search` + 1 WHERE `StoreDetails`.`No` = '" + no + "';"
+        cursor.execute(sql)
+
+    db.commit()
+    # 关闭数据库连接
+    db.close()
+
 def 輸出(res):
     print(base64.b64encode(res.encode(encoding="utf-8")).decode())
     exit(0)
@@ -83,8 +97,8 @@ def 輸出(res):
 if __name__ == "__main__":
     # print("你要搜尋什麼呢~ ")
     try:
-        #result = 聽使用者說話()
-        result = "Fila運動鞋在哪裡"
+        result = 聽使用者說話()
+        #result = "Fila運動鞋在哪裡"
         result = result.upper()  # 全部英文變大寫
         # print("你說了: ", result)
     except speech_recognition.UnknownValueError:
@@ -110,6 +124,7 @@ if __name__ == "__main__":
 
     主要資料 = {}
     次要資料 = {}
+    storeNames = []
 
     # 開始用關鍵字，去搜尋店名
     店家資料 = 用店名搜尋店家資料(關鍵字)
@@ -126,8 +141,12 @@ if __name__ == "__main__":
             'tel': 資料[5],
             'work_time': 資料[6],
             'detail': 資料[7],
+            'search': 資料[8],
+
         }
         主要資料[店家編號] = 重組資料
+
+        storeNames.append(店家編號)
         # 把搜尋到的資料的店家類型再塞入
         if 店家類型 not in 關鍵字:
             關鍵字.append(店家類型)
@@ -148,13 +167,16 @@ if __name__ == "__main__":
                 'tel': 資料[5],
                 'work_time': 資料[6],
                 'detail': 資料[7],
+                'search': 資料[8],
             }
             次要資料[店家編號] = 重組資料
+            #storeNames.append(店家編號)
 
     # num = len(主要資料)
     # print("主要資料數量: ", num)
     # num = len(次要資料)
     # print("相關類型資料數量: ", num)
+    增加搜尋次數(storeNames)
 
     data = {
         'text': result,
