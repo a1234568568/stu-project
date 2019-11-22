@@ -21,8 +21,6 @@
             padding: 0px 10px 15px 10px;
             width: 90%;
             height: 80%;
-
-
             margin: auto;
             position: relative;
             text-align: center;
@@ -58,6 +56,10 @@
             width: 80%;
 
         }
+
+        .output {
+            font-size: 40px;
+        }
     </style>
 </head>
 
@@ -72,7 +74,7 @@
             <img class="pic" v-if="isWating" src="/img/waiting2.gif" alt="等待中">
             <img class="pic" v-if="isLoading" src="/img/speak.gif" alt="讀取中">
         </div>
-        <p>{{ output }}</p>
+        <p :class="{'output': isLoading}">{{ output }}</p>
         <button @click="search" id="button">我 想 問 路 🚖</button>
         <div v-for="store in stores" class="imgdiv">
             <p>{{ store.name }} {{ store.type }}</p>
@@ -100,6 +102,7 @@
                     }
                     this.isWating = false
                     this.isLoading = true
+                    this.stores = []
                     this.ws.send('yes')
                 },
                 transform(store) {
