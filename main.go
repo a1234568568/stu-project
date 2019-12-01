@@ -1,17 +1,22 @@
 package main
 
 import (
-	"bytes"
-	"encoding/base64"
+	"log"
 	"net/http"
-	"os/exec"
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/jinzhu/gorm"
 )
 
 func main() {
+	var err error
+	db, err = gorm.Open("mysql", "root:qwe123@/DB?charset=utf8&parseTime=True&loc=Local")
+	if err != nil {
+		log.Fatal("請確認資料庫是否有啟動！")
+	}
+
 	// 建立伺服器
 	伺服器 := gin.Default()
 
@@ -46,49 +51,70 @@ func 問路連線(c *gin.Context) {
 	defer conn.Close()
 
 	for {
-		_, _, err := conn.ReadMessage()
+		_, text, err := conn.ReadMessage()
 		if err != nil {
 			return
 		}
 
-		err = conn.WriteMessage(websocket.TextMessage, []byte("載入中~"))
+		店家資料, 有資料, err := 到資料庫找店家資料(string(text))
+
+		data := map[string]interface{}{
+			"text": string(text),
+			"main": map[string]interface{}{},
+		}
+		if err != nil {
+			data["text"] = "系統發生錯誤: " + err.Error()
+		} else if !有資料 {
+			data["text"] = string(text) + "。 找不到相關店家資料"
+		} else {
+			data["main"] = map[string]interface{}{
+				店家資料.No: 店家資料,
+			}
+		}
+
+		err = conn.WriteJSON(data)
 		if err != nil {
 			return
 		}
 
-		cmd := exec.Command("python3", "./main.py")
-		stdout := bytes.NewBuffer([]byte{})
-		stderr := bytes.NewBuffer([]byte{})
-		cmd.Stdout = stdout
-		cmd.Stderr = stderr
+		// err = conn.WriteMessage(websocket.TextMessage, []byte("載入中~"))
+		// if err != nil {
+		// 	return
+		// }
 
-		err = cmd.Start()
-		if err != nil {
-			err = conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
-			if err != nil {
-				return
-			}
-			continue
-		} else {
-			err = conn.WriteMessage(websocket.TextMessage, []byte("請說~"))
-			if err != nil {
-				return
-			}
-		}
+		// cmd := exec.Command("python3", "./main.py")
+		// stdout := bytes.NewBuffer([]byte{})
+		// stderr := bytes.NewBuffer([]byte{})
+		// cmd.Stdout = stdout
+		// cmd.Stderr = stderr
 
-		err = cmd.Wait()
-		if err != nil {
-			err = conn.WriteMessage(websocket.TextMessage, stderr.Bytes())
-			if err != nil {
-				return
-			}
-		} else {
-			tt, err := base64.StdEncoding.DecodeString(string(stdout.Bytes()))
-			if err != nil {
-				conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
-			} else {
-				conn.WriteMessage(websocket.TextMessage, tt)
-			}
-		}
+		// err = cmd.Start()
+		// if err != nil {
+		// 	err = conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+		// 	if err != nil {
+		// 		return
+		// 	}
+		// 	continue
+		// } else {
+		// 	err = conn.WriteMessage(websocket.TextMessage, []byte("請說~"))
+		// 	if err != nil {
+		// 		return
+		// 	}
+		// }
+
+		// err = cmd.Wait()
+		// if err != nil {
+		// 	err = conn.WriteMessage(websocket.TextMessage, stderr.Bytes())
+		// 	if err != nil {
+		// 		return
+		// 	}
+		// } else {
+		// 	tt, err := base64.StdEncoding.DecodeString(string(stdout.Bytes()))
+		// 	if err != nil {
+		// 		conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+		// 	} else {
+		// 		conn.WriteMessage(websocket.TextMessage, tt)
+		// 	}
+		// }
 	}
 }

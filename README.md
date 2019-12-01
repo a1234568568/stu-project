@@ -8,25 +8,6 @@
 ---
 [Golang 下載網址](https://golang.org/dl/)
 
-下載Windows用的PyAudio (Windows才需要)
----
-點開網址: https://github.com/intxcc/pyaudio_portaudio/releases  
-下載: PyAudio-0.2.11-cp37-cp37m-win_amd64.whl
-接著到下載檔案的地方，開終端機執行以下指令
-```shell
-pip install PyAudio-0.2.11-cp37-cp37m-win_amd64.whl
-```
-
-安裝Python必要套件
----
-```shell
-# ! Windows ! 使用者執行以下指令
-pip install jieba SpeechRecognition
-
-# ! 不是 Windows ! 使用者執行以下指令
-pip3 install jieba pyaudio SpeechRecognition
-```
-
 啟動DB環境 (每次重開機之後必做)
 ---
 ```shell
@@ -45,11 +26,11 @@ docker-compose up -d
 啟動程式
 ---
 ```shell
-# 測試能布農動
-python3 main.py
-
-# 真的去執行專案的
 go build # 有改程式才需要打這個 或是 stu-project.exe 不見的時候
 ./stu-project.exe
 ```
 [看APP網址](http://127.0.0.1:8000)
+
+可以開啟伺服器給外面全世界
+---
+./ngrok http 8000

@@ -103,7 +103,43 @@
                     this.isWating = false
                     this.isLoading = true
                     this.stores = []
-                    this.ws.send('yes')
+
+                    this.display('🎤 請說~', '請說')
+
+                    window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition
+                    if (!window.SpeechRecognition) {
+                        this.display('🎧 你的瀏覽器不支援麥克風，請使用Chrome，再試一次！', '你的瀏覽器不支援麥克風，請使用Chrome，再試一次！')
+                        this.isWating = true
+                        this.isLoading = false
+                        return
+                    }
+
+                    let success = false
+                    const recognition = new SpeechRecognition() // 收使用者的麥克風聲音
+                    recognition.lang = 'zh-TW'
+                    recognition.onresult = (e) => { // 如果有說話，這邊會收到文字
+                        if (e.results.length == 0 || e.results[0].length == 0) {
+                            return
+                        }
+
+                        success = true
+                        const text = e.results[0][0].transcript
+                        this.display(`🎧 開始搜尋:${text}`, `開始搜尋`)
+                        this.ws.send(text)
+                    }
+
+                    recognition.onend = (e) => { // 收音結束會跑到這邊，如過收音沒成功會提示
+                        if (success) {
+                            return
+                        }
+                        this.isWating = true
+                        this.isLoading = false
+                        this.display('🎧 聽不清楚，請在說一次', '聽不清楚，請在說一次')
+                        return
+                    }
+
+                    setTimeout(() => recognition.start(), 1000)
+
                 },
                 transform(store) {
                     let data = {
@@ -141,6 +177,7 @@
                     return data
                 },
                 finish(data) {
+                    this.isWating = false
                     this.isLoading = false
                     this.stores = []
                     for (const key in data.main) {
@@ -162,8 +199,12 @@
                         this.output = ''
                     }, 30000)
                 },
-                display(text) {
+                display(text, sound) {
                     this.output = text
+                    const u = new SpeechSynthesisUtterance(); // 這個可以用來說話
+                    u.lang = 'zh-TW'
+                    u.text = sound
+                    window.speechSynthesis.speak(u)
                 }
             },
             mounted() {
@@ -178,10 +219,10 @@
                 this.ws.onmessage = (e) => {
                     try {
                         const data = JSON.parse(e.data)
-                        this.display('🎧 ' + data.text)
+                        this.display('🎧 ' + data.text, data.text)
                         this.finish(data)
                     } catch (error) {
-                        this.display('🎤 ' + e.data)
+                        this.display('🎤 ' + e.data + "~")
                     }
                 }
             }
