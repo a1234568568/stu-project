@@ -11,6 +11,20 @@ import (
 
 var db *gorm.DB
 
+func 到資料庫撈全部資料() (
+	店家資料 []StoreModel, err error,
+) {
+	店家資料 = []StoreModel{}
+
+	// 開始找資料庫
+	err = db.New().Find(&店家資料).Error
+	if err != nil {
+		return
+	}
+
+	return
+}
+
 func 到資料庫找店家資料(店名 string) (
 	店家資料 StoreModel,
 	有資料 bool, err error,
