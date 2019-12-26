@@ -41,6 +41,13 @@ func 到資料庫找店家資料(店名 string) (
 		return
 	}
 
+	// 搜尋出來後，搜尋次數+1
+	店家資料.Search++
+	err = db.Save(&店家資料).Error
+	if err != nil {
+		return
+	}
+
 	有資料 = true
 	return
 }
