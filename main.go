@@ -17,6 +17,8 @@ func main() {
 		log.Fatal("請確認資料庫是否有啟動！")
 	}
 
+	db.AutoMigrate(StoreModel{})
+
 	// 建立伺服器
 	伺服器 := gin.Default()
 
